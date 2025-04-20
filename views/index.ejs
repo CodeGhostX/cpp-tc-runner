@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C++ Code Runner</title>
+
+  <!-- Monaco Editor Style -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs/editor/editor.main.css">
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+
+    /* Container for both editor, input, and output */
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    /* Monaco editor takes 80% width */
+    #editor {
+      width: 80%;
+      height: 70vh;
+    }
+
+    /* Wrapper for input and output */
+    .input-output-wrapper {
+      display: flex;
+      justify-content: space-between;
+      width: 80%;
+      margin-top: 20px;
+    }
+
+    /* Input section on the left */
+    #inputSection {
+      width: 30%;
+      height: 150px;
+      background-color: #1e1e1e;
+      color: #00FF00;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', Courier, monospace;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    /* Output section on the right */
+    #output {
+      width: 65%;
+      height: 150px;
+      background-color: black;
+      color: #00FF00;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', Courier, monospace;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    /* Title */
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+
+    /* Styling for the "Run Code" button */
+    #runCodeBtn {
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.3s ease;
+      align-self: center;
+    }
+
+    /* Button hover effect */
+    #runCodeBtn:hover {
+      background-color: #45a049;
+      transform: scale(1.05);
+    }
+
+    /* Button click effect */
+    #runCodeBtn:active {
+      background-color: #388e3c;
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>C++ Code Runner</h1>
+
+    <!-- Monaco Editor Container -->
+    <div id="editor"></div>
+
+    <!-- Wrapper for input and output sections -->
+    <div class="input-output-wrapper">
+      <!-- Input Section -->
+      <div id="inputSection">
+        <label for="input">Input:</label>
+        <textarea id="input" placeholder="Enter your input here..." style="width: 100%; height: 100%; background-color: #1e1e1e; color: #00FF00; font-family: 'Courier New', Courier, monospace;"></textarea>
+      </div>
+
+      <!-- Output Section -->
+      <div id="output"></div>
+    </div>
+
+    <!-- Run Code Button -->
+    <button id="runCodeBtn">Run Code</button>
+  </div>
+
+  <!-- Monaco Editor Script -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs/loader.js"></script>
+  <script>
+    require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs' }}); 
+
+    require(['vs/editor/editor.main'], function() {
+      // Initialize Monaco Editor
+      var editor = monaco.editor.create(document.getElementById('editor'), {
+        value: '#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello, World!\";\n    return 0;\n}',
+        language: 'cpp',
+        theme: 'vs-dark',
+        automaticLayout: true
+      });
+
+      // Run code button functionality
+      document.getElementById('runCodeBtn').onclick = function() {
+        const code = editor.getValue();
+        const input = document.getElementById('input').value;  // Get input from the input section
+
+        // Make the POST request to run the code
+        fetch('/run', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ code, input })
+        })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('output').textContent = data.output || data.error;
+        })
+        .catch(error => console.error('Error:', error));
+      };
+    });
+  </script>
+</body>
+</html>
